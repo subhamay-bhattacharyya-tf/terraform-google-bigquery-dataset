@@ -50,18 +50,12 @@ variable "bigquery_dataset_config" {
   }
 
   validation {
-    condition = (
-      var.bigquery_dataset_config.default_table_expiration_ms == null ||
-      var.bigquery_dataset_config.default_table_expiration_ms >= 3600000
-    )
+    condition     = try(var.bigquery_dataset_config.default_table_expiration_ms >= 3600000, true)
     error_message = "default_table_expiration_ms must be at least 3600000 (1 hour) when set."
   }
 
   validation {
-    condition = (
-      var.bigquery_dataset_config.default_partition_expiration_ms == null ||
-      var.bigquery_dataset_config.default_partition_expiration_ms >= 3600000
-    )
+    condition     = try(var.bigquery_dataset_config.default_partition_expiration_ms >= 3600000, true)
     error_message = "default_partition_expiration_ms must be at least 3600000 (1 hour) when set."
   }
 
