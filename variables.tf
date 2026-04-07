@@ -25,17 +25,17 @@ variable "bigquery_dataset_config" {
   })
 
   validation {
-    condition     = length(var.bigquery_dataset_config.dataset_id) == 0 || can(regex("^[a-zA-Z0-9_]{1,1024}$", var.bigquery_dataset_config.dataset_id))
+    condition     = length(var.bigquery_dataset_config.dataset_id) >= 1 && length(var.bigquery_dataset_config.dataset_id) <= 1024 && length(regexall("^[a-zA-Z0-9_]+$", var.bigquery_dataset_config.dataset_id)) > 0
     error_message = "dataset_id must be 1-1024 characters: letters, numbers, and underscores only."
   }
 
   validation {
-    condition     = var.bigquery_dataset_config.project == null || can(regex("^[a-z][a-z0-9\\-]{4,28}[a-z0-9]$", var.bigquery_dataset_config.project))
+    condition     = var.bigquery_dataset_config.project == null || (length(var.bigquery_dataset_config.project) >= 6 && length(var.bigquery_dataset_config.project) <= 30 && length(regexall("^[a-z][a-z0-9-]+[a-z0-9]$", var.bigquery_dataset_config.project)) > 0)
     error_message = "project must be a valid GCP project ID (lowercase letters, digits, hyphens; 6-30 chars)."
   }
 
   validation {
-    condition = contains(
+    condition = try(contains(
       ["US", "EU", "US-CENTRAL1", "US-EAST1", "US-EAST4", "US-EAST5", "US-WEST1",
         "US-WEST2", "US-WEST3", "US-WEST4", "US-SOUTH1",
         "NORTHAMERICA-NORTHEAST1", "NORTHAMERICA-NORTHEAST2", "SOUTHAMERICA-EAST1", "SOUTHAMERICA-WEST1",
@@ -45,7 +45,7 @@ variable "bigquery_dataset_config" {
         "ASIA-NORTHEAST3", "ASIA-SOUTHEAST1", "ASIA-SOUTHEAST2", "ASIA-SOUTH1", "ASIA-SOUTH2",
       "AUSTRALIA-SOUTHEAST1", "AUSTRALIA-SOUTHEAST2", "ME-CENTRAL1", "ME-WEST1", "AFRICA-SOUTH1"],
       upper(var.bigquery_dataset_config.location)
-    )
+    ), true)
     error_message = "location must be a valid BigQuery multi-region (US, EU) or regional location."
   }
 
@@ -60,21 +60,21 @@ variable "bigquery_dataset_config" {
   }
 
   validation {
-    condition = alltrue([
+    condition = try(alltrue([
       for a in var.bigquery_dataset_config.access :
       a.role == null || contains(["READER", "WRITER", "OWNER"], a.role)
-    ])
+    ]), true)
     error_message = "access[*].role must be one of: READER, WRITER, OWNER."
   }
 
   validation {
-    condition = alltrue([
+    condition = try(alltrue([
       for a in var.bigquery_dataset_config.access :
       a.special_group == null || contains(
         ["projectOwners", "projectReaders", "projectWriters", "allAuthenticatedUsers"],
         a.special_group
       )
-    ])
+    ]), true)
     error_message = "access[*].special_group must be one of: projectOwners, projectReaders, projectWriters, allAuthenticatedUsers."
   }
 }
