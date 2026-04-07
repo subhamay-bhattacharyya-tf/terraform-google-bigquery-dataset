@@ -1,4 +1,3 @@
-
 terraform {
   required_version = ">= 1.3.0"
 
@@ -8,8 +7,4 @@ terraform {
       version = ">= 7.23.0"
     }
   }
-}
-
-provider "google" {
-  region = var.region
 }

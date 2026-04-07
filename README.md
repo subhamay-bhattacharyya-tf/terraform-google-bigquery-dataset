@@ -1,60 +1,152 @@
-# Terraform Module for GCS Bucket
+# terraform-google-bigquery-dataset
 
-![Release](https://github.com/subhamay-bhattacharyya-tf/terraform-google-module-template/actions/workflows/ci.yaml/badge.svg)&nbsp;![GCP](https://img.shields.io/badge/GCP-4285F4?logo=googlecloud&logoColor=white)&nbsp;![Commit Activity](https://img.shields.io/github/commit-activity/t/subhamay-bhattacharyya-tf/terraform-google-module-template)&nbsp;![Last Commit](https://img.shields.io/github/last-commit/subhamay-bhattacharyya-tf/terraform-google-module-template)&nbsp;![Release Date](https://img.shields.io/github/release-date/subhamay-bhattacharyya-tf/terraform-google-module-template)&nbsp;![Repo Size](https://img.shields.io/github/repo-size/subhamay-bhattacharyya-tf/terraform-google-module-template)&nbsp;![File Count](https://img.shields.io/github/directory-file-count/subhamay-bhattacharyya-tf/terraform-google-module-template)&nbsp;![Issues](https://img.shields.io/github/issues/subhamay-bhattacharyya-tf/terraform-google-module-template)&nbsp;![Top Language](https://img.shields.io/github/languages/top/subhamay-bhattacharyya-tf/terraform-google-module-template)&nbsp;![Built with Claude Code](https://img.shields.io/badge/Built%20with-Claude%20Code-623CE4?logo=anthropic&logoColor=white)&nbsp;![Custom Endpoint](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/bsubhamay/476e6e7583432e960e6de16d5223e6a3/raw/terraform-google-module-template.json?)
+![Release](https://github.com/subhamay-bhattacharyya-tf/terraform-google-bigquery-dataset/actions/workflows/ci.yaml/badge.svg)&nbsp;![GCP](https://img.shields.io/badge/GCP-4285F4?logo=googlecloud&logoColor=white)&nbsp;![Commit Activity](https://img.shields.io/github/commit-activity/t/subhamay-bhattacharyya-tf/terraform-google-bigquery-dataset)&nbsp;![Last Commit](https://img.shields.io/github/last-commit/subhamay-bhattacharyya-tf/terraform-google-bigquery-dataset)&nbsp;![Release Date](https://img.shields.io/github/release-date/subhamay-bhattacharyya-tf/terraform-google-bigquery-dataset)&nbsp;![Repo Size](https://img.shields.io/github/repo-size/subhamay-bhattacharyya-tf/terraform-google-bigquery-dataset)&nbsp;![File Count](https://img.shields.io/github/directory-file-count/subhamay-bhattacharyya-tf/terraform-google-bigquery-dataset)&nbsp;![Issues](https://img.shields.io/github/issues/subhamay-bhattacharyya-tf/terraform-google-bigquery-dataset)&nbsp;![Top Language](https://img.shields.io/github/languages/top/subhamay-bhattacharyya-tf/terraform-google-bigquery-dataset)&nbsp;![Built with Claude Code](https://img.shields.io/badge/Built%20with-Claude%20Code-623CE4?logo=anthropic&logoColor=white)&nbsp;![Custom Endpoint](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/bsubhamay/476e6e7583432e960e6de16d5223e6a3/raw/terraform-google-bigquery-dataset.json?)&nbsp;![Terraform Version](https://img.shields.io/badge/terraform-%3E%3D1.3-blue)&nbsp;![Provider Version](https://img.shields.io/badge/google-%3E%3D7.23-blue)
 
-A Terraform module for creating and managing a **Google Cloud Storage (GCS) bucket** on GCP.
+A Terraform module for creating and managing a **Google BigQuery Dataset** on GCP.
+
+---
 
 ## Overview
 
-This module provisions a single `google_storage_bucket` resource via the `terraform-google-module-template` module. It accepts a small set of flat input variables and assembles the required `gcs_config` object, enforcing `uniform_bucket_level_access = true` and `public_access_prevention = "enforced"` by default.
+This module provisions a single `google_bigquery_dataset` resource with full support for access controls, table/partition expiration policies, labels, and multi-region or regional placement. It accepts a single structured `bigquery_dataset_config` input variable with comprehensive validation rules for dataset ID naming, location, expiration bounds, access roles, and project ID format.
 
-## Requirements
-
-| Requirement | Version |
-|---|---|
-| Terraform | >= 1.3.0 |
-| Google Provider | >= 7.23.0 |
+---
 
 ## Usage
 
 ```hcl
-module "gcs_bucket" {
-  source = "github.com/subhamay-bhattacharyya-tf/terraform-google-module-template"
+module "bigquery_dataset" {
+  source = "github.com/subhamay-bhattacharyya-tf/terraform-google-bigquery-dataset"
 
-  bucket_name = "my-portfolio-bucket"
-  project_id  = "portfolio-site"
-  location    = "US"
-  environment = "prod"
+  bigquery_dataset_config = {
+    dataset_id    = "my_analytics_dataset"
+    project       = "prj-22-bigquery-16748"
+    location      = "US"
+    description   = "Analytics dataset for the data platform team"
+    friendly_name = "Analytics Dataset"
+    labels        = { env = "prod", team = "data" }
+    access = [
+      { role = "READER", special_group = "projectReaders" },
+      { role = "WRITER", user_by_email = "etl-sa@prj-22-bigquery-16748.iam.gserviceaccount.com" }
+    ]
+  }
 }
 ```
 
-## Input Variables
+---
+
+## Requirements
+
+| Name | Version |
+| --- | --- |
+| terraform | >= 1.3.0 |
+| google | >= 7.23.0 |
+
+**Additional prerequisites:**
+
+- GCP credentials with `bigquery.datasets.create` permission
+- A GCP project with the BigQuery API enabled
+
+---
+
+## Inputs
+
+<!-- AUTO-GENERATED by terraform-docs -- do not edit manually -->
 
 | Name | Description | Type | Default | Required |
-|---|---|---|---|---|
-| `bucket_name` | Name of the GCS bucket | `string` | — | yes |
-| `project_id` | GCP project ID | `string` | `"portfolio-site"` | no |
-| `region` | GCP region | `string` | `"us-central1"` | no |
-| `location` | GCS bucket location | `string` | `"US"` | no |
-| `storage_class` | Storage class | `string` | `"STANDARD"` | no |
-| `force_destroy` | Force-destroy bucket on destroy | `bool` | `false` | no |
-| `versioning` | Enable object versioning | `bool` | `false` | no |
-| `labels` | Additional labels | `map(string)` | `{}` | no |
-| `project` | Project label value | `string` | `"portfolio-site"` | no |
-| `environment` | Environment label value | `string` | `"dev"` | no |
+| --- | --- | --- | --- | :---: |
+| bigquery\_dataset\_config | Configuration for the BigQuery dataset | `object` | n/a | **yes** |
+
+### `bigquery_dataset_config` attributes
+
+| Attribute | Type | Default | Required | Validation |
+| --- | --- | --- | :---: | --- |
+| dataset\_id | `string` | n/a | **yes** | 1-1024 chars; letters, numbers, underscores only |
+| project | `string` | `null` | no | Must match GCP project ID format |
+| location | `string` | `"US"` | no | Valid BigQuery multi-region or regional location |
+| description | `string` | `null` | no | -- |
+| friendly\_name | `string` | `null` | no | -- |
+| delete\_contents\_on\_destroy | `bool` | `false` | no | -- |
+| default\_table\_expiration\_ms | `number` | `null` | no | >= 3600000 (1 hour) when set |
+| default\_partition\_expiration\_ms | `number` | `null` | no | >= 3600000 (1 hour) when set |
+| labels | `map(string)` | `{}` | no | -- |
+| access | `list(object)` | `[]` | no | See access object schema below |
+
+### `access` object attributes
+
+| Attribute | Type | Notes |
+| --- | --- | --- |
+| role | `string` | One of: `READER`, `WRITER`, `OWNER` |
+| user\_by\_email | `string` | Mutually exclusive with other member fields |
+| group\_by\_email | `string` | Mutually exclusive with other member fields |
+| domain | `string` | Mutually exclusive with other member fields |
+| special\_group | `string` | One of: `projectOwners`, `projectReaders`, `projectWriters`, `allAuthenticatedUsers` |
+| iam\_member | `string` | Mutually exclusive with other member fields |
+
+---
 
 ## Outputs
 
+<!-- AUTO-GENERATED by terraform-docs -- do not edit manually -->
+
 | Name | Description |
-|---|---|
-| `bucket_id` | The ID of the GCS bucket |
-| `bucket_name` | The name of the GCS bucket |
-| `bucket_project` | The project ID where the bucket is created |
-| `bucket_location` | The location of the GCS bucket |
-| `bucket_url` | The URL of the GCS bucket |
-| `bucket_self_link` | The self link of the GCS bucket resource |
-| `bucket_storage_class` | The storage class of the GCS bucket |
-| `bucket_force_destroy` | Whether force_destroy is enabled |
+| --- | --- |
+| id | The fully qualified ID of the dataset |
+| dataset\_id | The dataset ID |
+| project | The project containing the dataset |
+| location | The geographic location of the dataset |
+| self\_link | The URI of the created resource |
+| creation\_time | Dataset creation time in milliseconds since the epoch |
+| last\_modified\_time | Dataset last modified time in milliseconds since the epoch |
+| etag | A hash of the resource |
+
+---
+
+## Resources
+
+| Name | Type |
+| --- | --- |
+| [google_bigquery_dataset.this](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/bigquery_dataset) | resource |
+
+---
+
+## Examples
+
+| Example | Description |
+| --- | --- |
+| [basic](examples/bigquery_dataset/basic/) | Minimal required fields only with sensible defaults |
+
+> Each example is a standalone, runnable Terraform configuration stored in `examples/<name>/` with its own `README.md` and terraform validation.
+
+---
+
+## Notes & Caveats
+
+- Setting `delete_contents_on_destroy = true` will delete all tables in the dataset when running `terraform destroy`. Use with caution in production.
+- When `access` blocks are specified, they replace the default access controls entirely. Include `projectOwners` with `OWNER` role if you want to preserve default project owner access.
+- The `location` field cannot be changed after the dataset is created. Changing it forces resource recreation.
+- This module does not manage individual BigQuery tables, views, or routines -- use dedicated modules for those resources.
+
+---
+
+## Contributing
+
+See [CONTRIBUTING.md](./CONTRIBUTING.md) for full guidelines.
+
+```bash
+# Quick start
+git clone git@github.com:subhamay-bhattacharyya-tf/terraform-google-bigquery-dataset.git
+cd terraform-google-bigquery-dataset
+terraform fmt -recursive
+terraform validate
+```
+
+1. Fork the repository and create a feature branch (`git checkout -b feat/my-feature`)
+2. Run `terraform fmt`, `terraform validate`, and `terraform-docs .`
+3. Add or update tests under `test/` (Terratest)
+4. Open a pull request against `main` with a clear description of changes
+
+---
 
 ## CI / Workload Identity Federation Setup
 
@@ -62,10 +154,10 @@ The Terratest job authenticates to GCP via [Workload Identity Federation](https:
 
 ```bash
 gcloud iam service-accounts add-iam-policy-binding \
-    "sa-17-cloud-storage@prj-17-cloud-storage-16748.iam.gserviceaccount.com" \
-    --project="prj-17-cloud-storage-16748" \
+    "<service-account-email>" \
+    --project="prj-22-bigquery-16748" \
     --role="roles/iam.workloadIdentityUser" \
-    --member="principalSet://iam.googleapis.com/projects/578842011545/locations/global/workloadIdentityPools/github-actions/attribute.repository/subhamay-bhattacharyya-tf/terraform-google-module-template"
+    --member="principalSet://iam.googleapis.com/projects/<project-number>/locations/global/workloadIdentityPools/<pool-name>/attribute.repository/subhamay-bhattacharyya-tf/terraform-google-bigquery-dataset"
 ```
 
 The three repository variables required by the CI workflow are:
@@ -76,6 +168,8 @@ The three repository variables required by the CI workflow are:
 | `GCP_WORKLOAD_IDENTITY_PROVIDER` | Full WIF provider resource name |
 | `GCP_SERVICE_ACCOUNT` | Service account email to impersonate |
 
+---
+
 ## License
 
-Apache 2.0 — see [LICENSE](LICENSE).
+MIT -- see [LICENSE](LICENSE).

@@ -1,23 +1,28 @@
-# ============================================================================
-# GCS Bucket Module - Main
-# Creates and manages a Google Cloud Storage bucket.
-# ============================================================================
+# -----------------------------------------------------------------------------
+# BigQuery Dataset Module - Main
+# Creates and manages a Google BigQuery dataset.
+# -----------------------------------------------------------------------------
 
-resource "google_storage_bucket" "this" {
-  name                        = var.bucket_name
-  project                     = var.project_id
-  location                    = var.location
-  storage_class               = upper(var.storage_class)
-  force_destroy               = var.force_destroy
-  uniform_bucket_level_access = true
-  public_access_prevention    = "enforced"
+resource "google_bigquery_dataset" "this" {
+  dataset_id                      = var.bigquery_dataset_config.dataset_id
+  project                         = var.bigquery_dataset_config.project
+  location                        = var.bigquery_dataset_config.location
+  description                     = var.bigquery_dataset_config.description
+  friendly_name                   = var.bigquery_dataset_config.friendly_name
+  delete_contents_on_destroy      = var.bigquery_dataset_config.delete_contents_on_destroy
+  default_table_expiration_ms     = var.bigquery_dataset_config.default_table_expiration_ms
+  default_partition_expiration_ms = var.bigquery_dataset_config.default_partition_expiration_ms
+  labels                          = var.bigquery_dataset_config.labels
 
-  labels = merge(var.labels, {
-    project     = var.project
-    environment = var.environment
-  })
-
-  versioning {
-    enabled = var.versioning
+  dynamic "access" {
+    for_each = var.bigquery_dataset_config.access
+    content {
+      role           = access.value.role
+      user_by_email  = access.value.user_by_email
+      group_by_email = access.value.group_by_email
+      domain         = access.value.domain
+      special_group  = access.value.special_group
+      iam_member     = access.value.iam_member
+    }
   }
 }

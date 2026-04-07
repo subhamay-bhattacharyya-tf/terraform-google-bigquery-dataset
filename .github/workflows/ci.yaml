@@ -69,7 +69,7 @@ jobs:
     strategy:
       matrix:
         example:
-          - examples/bucket/basic
+          - examples/bigquery_dataset/basic
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -129,13 +129,13 @@ jobs:
           go mod download
         working-directory: test
 
-      - name: Run Terratest - GCS Bucket Basic
-        id: gcs-bucket-basic-test
+      - name: Run Terratest - BigQuery Dataset Basic
+        id: bigquery-dataset-basic-test
         run: |
           set -o pipefail
-          go test -v -timeout 30m -run TestGCSBucketBasic \
-            ./gcs_bucket_basic_test.go ./helpers_test.go 2>&1 | tee test_output.txt
-          echo "## GCS Bucket Basic Test Results" >> $GITHUB_STEP_SUMMARY
+          go test -v -timeout 30m -run TestBigQueryDatasetBasic \
+            ./bigquery_dataset_basic_test.go ./helpers_test.go 2>&1 | tee test_output.txt
+          echo "## BigQuery Dataset Basic Test Results" >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
           cat test_output.txt >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
@@ -208,4 +208,4 @@ jobs:
             @semantic-release/git@10.0.1
             conventional-changelog-conventionalcommits@9.1.0
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
